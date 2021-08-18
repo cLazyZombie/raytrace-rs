@@ -2,7 +2,7 @@ use std::ops::{Index, IndexMut, Mul};
 
 #[cfg(test)]
 use crate::lib_test::almost_eq_f32;
-use crate::Tuple;
+use crate::{Angle, Tuple};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Matrix<const R: usize, const C: usize> {
@@ -41,6 +41,22 @@ impl<const S: usize> Matrix<S, S> {
         let mut m = Matrix::default();
         for i in 0..S {
             m[(i, i)] = 1.0;
+        }
+        m
+    }
+
+    pub fn translate(p: Tuple<S>) -> Matrix<S, S> {
+        let mut m = Matrix::identity();
+        for r in 0..S {
+            m[(r, S - 1)] = p[r];
+        }
+        m
+    }
+
+    pub fn scale(p: Tuple<S>) -> Matrix<S, S> {
+        let mut m = Matrix::identity();
+        for r in 0..S {
+            m[(r, r)] = p[r];
         }
         m
     }
@@ -104,6 +120,45 @@ impl Matrix4 {
             }
             Some(m)
         }
+    }
+
+    pub fn rotation_x(angle: Angle) -> Self {
+        let radian = angle.radian();
+        let cos = radian.cos();
+        let sin = radian.sin();
+
+        let mut m = Matrix::identity();
+        m[(1, 1)] = cos;
+        m[(1, 2)] = -sin;
+        m[(2, 1)] = sin;
+        m[(2, 2)] = cos;
+        m
+    }
+
+    pub fn rotation_y(angle: Angle) -> Self {
+        let radian = angle.radian();
+        let cos = radian.cos();
+        let sin = radian.sin();
+
+        let mut m = Matrix::identity();
+        m[(0, 0)] = cos;
+        m[(0, 2)] = sin;
+        m[(2, 0)] = -sin;
+        m[(2, 2)] = cos;
+        m
+    }
+
+    pub fn rotation_z(angle: Angle) -> Self {
+        let radian = angle.radian();
+        let cos = radian.cos();
+        let sin = radian.sin();
+
+        let mut m = Matrix::identity();
+        m[(0, 0)] = cos;
+        m[(0, 1)] = -sin;
+        m[(1, 0)] = sin;
+        m[(1, 1)] = cos;
+        m
     }
 }
 
@@ -290,7 +345,7 @@ macro_rules! mat {
 mod tests {
     use crate::{
         lib_test::{assert_almost_eq_mat, assert_almost_eq_tuple},
-        point,
+        point, vector,
     };
 
     use super::*;
@@ -517,5 +572,103 @@ mod tests {
 		];
 
         assert_almost_eq_mat(m.inverse().unwrap(), expected);
+    }
+
+    #[test]
+    fn multiply_product_by_inverse() {
+        #[rustfmt::skip]
+		let m1: Matrix4 = mat![
+			3.0, -9.0, 7.0, 3.0,
+			3.0, -8.0, 2.0, -9.0,
+			-4.0, 4.0, 4.0, 1.0,
+			-6.0, 5.0, -1.0, 1.0,
+		];
+
+        #[rustfmt::skip]
+		let m2: Matrix4 = mat![
+			8.0, 2.0, 2.0, 2.0,
+			3.0, -1.0, 7.0, 0.0,
+			7.0, 0.0, 5.0, 4.0,
+			6.0, -2.0, 0.0, 5.0,
+		];
+
+        let m3 = m1 * m2;
+        assert_almost_eq_mat(m3 * m2.inverse().unwrap(), m1);
+    }
+
+    #[test]
+    fn multiply_by_translation_matrix() {
+        let m: Matrix4 = Matrix::translate(point(5.0, -3.0, 2.0));
+        let p = point(-3.0, 4.0, 5.0);
+        assert_almost_eq_tuple(m * p, point(2.0, 1.0, 7.0));
+    }
+
+    #[test]
+    fn multiply_by_inverse_of_translation_matrix() {
+        let t: Matrix4 = Matrix::translate(point(5.0, -3.0, 2.0));
+        let inv = t.inverse().unwrap();
+        let p = point(-3.0, 4.0, 5.0);
+        assert_almost_eq_tuple(inv * p, point(-8.0, 7.0, 3.0));
+    }
+
+    #[test]
+    fn translate_does_not_affect_vectors() {
+        let t = Matrix::translate(point(5.0, -3.0, 2.0));
+        let v = vector(-3.0, 4.0, 5.0);
+        assert_eq!(t * v, v);
+    }
+
+    #[test]
+    fn scale_matrix_applied_point() {
+        let s = Matrix::scale(point(2.0, 3.0, 4.0));
+        let p = point(-4.0, 6.0, 8.0);
+        assert_almost_eq_tuple(s * p, point(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn scale_matrix_applied_vector() {
+        let s = Matrix::scale(point(2.0, 3.0, 4.0));
+        let v = vector(-4.0, 6.0, 8.0);
+        assert_almost_eq_tuple(s * v, vector(-8.0, 18.0, 32.0));
+    }
+
+    #[test]
+    fn rotate_point_around_x_axis() {
+        let p = point(0.0, 1.0, 0.0);
+        let half_quater = Matrix::rotation_x(Angle::from_degree(45.0));
+        let full_quater = Matrix::rotation_x(Angle::from_degree(90.0));
+
+        assert_almost_eq_tuple(
+            half_quater * p,
+            point(0.0, f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0),
+        );
+
+        assert_almost_eq_tuple(full_quater * p, point(0.0, 0.0, 1.0));
+    }
+
+    #[test]
+    fn rotate_point_around_y_axis() {
+        let p = point(0.0, 0.0, 1.0);
+        let half_quater = Matrix::rotation_y(Angle::from_degree(45.0));
+        let full_quater = Matrix::rotation_y(Angle::from_degree(90.0));
+
+        assert_almost_eq_tuple(
+            half_quater * p,
+            point(f32::sqrt(2.0) / 2.0, 0.0, f32::sqrt(2.0) / 2.0),
+        );
+        assert_almost_eq_tuple(full_quater * p, point(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn rotate_point_around_z_axis() {
+        let p = point(0.0, 1.0, 0.0);
+        let half_quater = Matrix::rotation_z(Angle::from_degree(45.0));
+        let full_quater = Matrix::rotation_z(Angle::from_degree(90.0));
+
+        assert_almost_eq_tuple(
+            half_quater * p,
+            point(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0),
+        );
+        assert_almost_eq_tuple(full_quater * p, point(-1.0, 0.0, 0.0));
     }
 }
