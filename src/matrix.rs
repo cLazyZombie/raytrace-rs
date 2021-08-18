@@ -160,6 +160,17 @@ impl Matrix4 {
         m[(1, 1)] = cos;
         m
     }
+
+    pub fn shear(xy: f32, xz: f32, yx: f32, yz: f32, zx: f32, zy: f32) -> Self {
+        let mut m = Matrix::identity();
+        m[(0, 1)] = xy;
+        m[(0, 2)] = xz;
+        m[(1, 0)] = yx;
+        m[(1, 2)] = yz;
+        m[(2, 0)] = zx;
+        m[(2, 1)] = zy;
+        m
+    }
 }
 
 impl Matrix3 {
@@ -670,5 +681,12 @@ mod tests {
             point(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0),
         );
         assert_almost_eq_tuple(full_quater * p, point(-1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn test_shear() {
+        let m = Matrix::shear(1.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+        let p = point(2.0, 3.0, 4.0);
+        assert_eq!(m * p, point(5.0, 3.0, 4.0));
     }
 }
