@@ -2,6 +2,7 @@ use std::ops::{Index, IndexMut, Mul};
 
 #[cfg(test)]
 use crate::lib_test::almost_eq_f32;
+use crate::Tuple;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Matrix<const R: usize, const C: usize> {
@@ -111,6 +112,14 @@ impl<const R: usize, const C: usize, const C2: usize> Mul<Matrix<C, C2>> for Mat
         }
 
         result
+    }
+}
+
+impl<const R: usize> Mul<Tuple<4>> for Matrix<R, 4> {
+    type Output = Tuple<4>;
+
+    fn mul(self, _rhs: Tuple<4>) -> Self::Output {
+        todo!()
     }
 }
 
