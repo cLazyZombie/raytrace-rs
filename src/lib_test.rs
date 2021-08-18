@@ -29,5 +29,6 @@ pub(crate) fn assert_almost_eq_mat<const R: usize, const C: usize>(
 
 pub(crate) fn almost_eq_f32(a: f32, b: f32) -> bool {
     let diff = f32::abs(a - b);
-    diff <= f32::EPSILON
+    //diff <= f32::EPSILON
+    diff <= 0.0001
 }

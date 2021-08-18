@@ -4,44 +4,19 @@ use std::ops::{Index, IndexMut, Mul};
 use crate::lib_test::almost_eq_f32;
 use crate::Tuple;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Matrix<const R: usize, const C: usize> {
-    columns: [Column<R>; C],
+    columns: [Tuple<R>; C],
 }
 
 pub type Matrix2 = Matrix<2, 2>;
 pub type Matrix3 = Matrix<3, 3>;
 pub type Matrix4 = Matrix<4, 4>;
 
-#[derive(Copy, Clone, Debug)]
-struct Column<const M: usize> {
-    values: [f32; M],
-}
-
-impl<const M: usize> Default for Column<M> {
-    fn default() -> Self {
-        Self { values: [0.0; M] }
-    }
-}
-
-impl<const M: usize> Index<usize> for Column<M> {
-    type Output = f32;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.values[index]
-    }
-}
-
-impl<const M: usize> IndexMut<usize> for Column<M> {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        &mut self.values[index]
-    }
-}
-
 impl<const R: usize, const C: usize> Default for Matrix<R, C> {
     fn default() -> Self {
         Self {
-            columns: [Column::default(); C],
+            columns: [Tuple::default(); C],
         }
     }
 }
@@ -61,24 +36,190 @@ impl<const R: usize, const C: usize> IndexMut<(usize, usize)> for Matrix<R, C> {
 }
 
 /// Square Matrix 전용 methods
-impl<const RC: usize> Matrix<RC, RC> {
+impl<const S: usize> Matrix<S, S> {
     pub fn identity() -> Self {
         let mut m = Matrix::default();
-        for i in 0..RC {
+        for i in 0..S {
             m[(i, i)] = 1.0;
         }
         m
     }
 }
 
-impl<const R: usize, const C: usize> Matrix<R, C> {
-    #[allow(dead_code)]
-    fn assign(&mut self, values: &[f32]) {
-        for r in 0..R {
-            for c in 0..C {
-                self.columns[c][r] = values[r * C + c];
+impl Matrix4 {
+    /// remove row, column from self
+    pub fn submatrix(&self, row: usize, column: usize) -> Matrix3 {
+        let mut m: Matrix3 = Matrix::default();
+        for r in 0..4 {
+            if r == row {
+                continue;
+            }
+
+            for c in 0..4 {
+                if c == column {
+                    continue;
+                }
+
+                let copy_row = if r < row { r } else { r - 1 };
+                let copy_col = if c < column { c } else { c - 1 };
+                m[(copy_row, copy_col)] = self[(r, c)];
             }
         }
+        m
+    }
+
+    pub fn minor(&self, row: usize, column: usize) -> f32 {
+        let sub = self.submatrix(row, column);
+        sub.determinant()
+    }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> f32 {
+        let v = self.minor(row, column);
+        if (row + column) % 2 == 0 {
+            v
+        } else {
+            -v
+        }
+    }
+
+    pub fn determinant(&self) -> f32 {
+        let mut det = 0.0;
+        for n in 0..4 {
+            det += self.cofactor(0, n) * self[(0, n)];
+        }
+        det
+    }
+
+    pub fn inverse(&self) -> Option<Self> {
+        let det = self.determinant();
+        if det.abs() <= f32::EPSILON {
+            None
+        } else {
+            let mut m: Matrix4 = Matrix::default();
+            for r in 0..4 {
+                for c in 0..4 {
+                    let cof = self.cofactor(r, c);
+                    m[(c, r)] = cof / det;
+                }
+            }
+            Some(m)
+        }
+    }
+}
+
+impl Matrix3 {
+    /// remove row, column from self
+    pub fn submatrix(&self, row: usize, column: usize) -> Matrix2 {
+        let mut m: Matrix2 = Matrix::default();
+        for r in 0..3 {
+            if r == row {
+                continue;
+            }
+
+            for c in 0..3 {
+                if c == column {
+                    continue;
+                }
+
+                let copy_row = if r < row { r } else { r - 1 };
+                let copy_col = if c < column { c } else { c - 1 };
+                m[(copy_row, copy_col)] = self[(r, c)];
+            }
+        }
+        m
+    }
+
+    pub fn minor(&self, row: usize, column: usize) -> f32 {
+        let sub = self.submatrix(row, column);
+        sub.determinant()
+    }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> f32 {
+        let v = self.minor(row, column);
+        if (row + column) % 2 == 0 {
+            v
+        } else {
+            -v
+        }
+    }
+
+    pub fn determinant(&self) -> f32 {
+        let mut det = 0.0;
+        for n in 0..3 {
+            det += self.cofactor(0, n) * self[(0, n)];
+        }
+        det
+    }
+
+    pub fn inverse(&self) -> Option<Self> {
+        let det = self.determinant();
+        if det.abs() <= f32::EPSILON {
+            None
+        } else {
+            let mut m: Matrix3 = Matrix::default();
+            for r in 0..3 {
+                for c in 0..3 {
+                    let cof = self.cofactor(r, c);
+                    m[(c, r)] = cof / det;
+                }
+            }
+            Some(m)
+        }
+    }
+}
+
+impl Matrix2 {
+    pub fn determinant(&self) -> f32 {
+        self[(0, 0)] * self[(1, 1)] - self[(0, 1)] * self[(1, 0)]
+    }
+
+    pub fn cofactor(&self, row: usize, column: usize) -> f32 {
+        let row = if row == 0 { 1 } else { 0 };
+        let column = if column == 0 { 1 } else { 0 };
+        let v = self[(row, column)];
+        if (row + column) % 2 == 0 {
+            v
+        } else {
+            -v
+        }
+    }
+
+    pub fn inverse(&self) -> Option<Self> {
+        let det = self.determinant();
+        if det.abs() <= f32::EPSILON {
+            None
+        } else {
+            let mut m: Matrix2 = Matrix::default();
+            for r in 0..2 {
+                for c in 0..2 {
+                    let cof = self.cofactor(r, c);
+                    m[(c, r)] = cof / det;
+                }
+            }
+            Some(m)
+        }
+    }
+}
+
+impl<const R: usize, const C: usize> Matrix<R, C> {
+    pub fn new(values: &[f32]) -> Self {
+        let mut m = Matrix::default();
+        for r in 0..R {
+            for c in 0..C {
+                m.columns[c][r] = values[r * C + c];
+            }
+        }
+        m
+    }
+
+    pub fn transpose(&self) -> Matrix<C, R> {
+        let mut m = Matrix::default();
+        for r in 0..R {
+            for c in 0..C {
+                m[(c, r)] = self[(r, c)];
+            }
+        }
+        m
     }
 
     #[cfg(test)]
@@ -115,11 +256,20 @@ impl<const R: usize, const C: usize, const C2: usize> Mul<Matrix<C, C2>> for Mat
     }
 }
 
-impl<const R: usize> Mul<Tuple<4>> for Matrix<R, 4> {
-    type Output = Tuple<4>;
+impl<const R: usize, const C: usize> Mul<Tuple<C>> for Matrix<R, C> {
+    type Output = Tuple<C>;
 
-    fn mul(self, _rhs: Tuple<4>) -> Self::Output {
-        todo!()
+    fn mul(self, rhs: Tuple<C>) -> Self::Output {
+        let mut result = Tuple::default();
+
+        for r in 0..R {
+            let mut sum = 0.0;
+            for c in 0..C {
+                sum += self[(r, c)] * rhs[c];
+            }
+            result[r] = sum;
+        }
+        result
     }
 }
 
@@ -131,16 +281,17 @@ macro_rules! mat {
 			$(
 				v.push($x);
 			)*
-			let mut m = Matrix::default();
-			m.assign(&v);
-			m
+			Matrix::new(&v)
 		}
 	};
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::lib_test::assert_almost_eq_mat;
+    use crate::{
+        lib_test::{assert_almost_eq_mat, assert_almost_eq_tuple},
+        point,
+    };
 
     use super::*;
 
@@ -230,5 +381,141 @@ mod tests {
 		];
 
         assert_almost_eq_mat(m1 * m2, result);
+    }
+
+    #[test]
+    fn matrix_multiply_by_tuple() {
+        #[rustfmt::skip]
+		let m: Matrix4 = mat! [
+			1.0, 2.0, 3.0, 4.0,
+			2.0, 4.0, 4.0, 2.0,
+			8.0, 6.0, 4.0, 1.0,
+			0.0, 0.0, 0.0, 1.0,
+		];
+
+        let v = point(1.0, 2.0, 3.0);
+        assert_almost_eq_tuple(m * v, point(18.0, 24.0, 33.0));
+    }
+
+    #[test]
+    fn multiply_matrix_by_identity_matrix() {
+        let m1: Matrix4 =
+            mat![1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,];
+
+        let m2: Matrix4 = Matrix::identity();
+
+        assert!(m1 * m2 == m1);
+    }
+
+    #[test]
+    fn transpose_matrix() {
+        let m: Matrix<2, 3> = mat![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+        let expected: Matrix<3, 2> = mat![1.0, 4.0, 2.0, 5.0, 3.0, 6.0];
+
+        assert!(m.transpose() == expected);
+    }
+
+    #[test]
+    fn submatrix() {
+        #[rustfmt::skip]
+		let m: Matrix3 = mat![
+			1.0, 5.0, 0.0,
+			-3.0, 2.0, 7.0,
+			0.0, 6.0, -3.0,
+		];
+
+        #[rustfmt::skip]
+		let expected: Matrix2 = mat![
+			-3.0, 2.0,
+			0.0, 6.0,
+		];
+
+        assert_almost_eq_mat(m.submatrix(0, 2), expected);
+
+        #[rustfmt::skip]
+		let m: Matrix4 = mat![
+			-6.0, 1.0, 1.0, 6.0,
+			-8.0, 5.0, 8.0, 6.0,
+			-1.0, 0.0, 8.0, 2.0,
+			-7.0, 1.0, -1.0, 1.0,
+		];
+
+        #[rustfmt::skip]
+		let expected: Matrix3 = mat![
+			-6.0, 1.0, 6.0,
+			-8.0, 8.0, 6.0,
+			-7.0, -1.0, 1.0,
+		];
+
+        assert_almost_eq_mat(m.submatrix(2, 1), expected);
+    }
+
+    #[test]
+    fn minor_of_matrix3() {
+        #[rustfmt::skip]
+		let m: Matrix3 = mat![
+			3.0, 5.0, 0.0,
+			2.0, -1.0, -7.0,
+			6.0, -1.0, 5.0,
+		];
+
+        assert_eq!(m.minor(0, 0), -12.0);
+        assert_eq!(m.cofactor(0, 0), -12.0);
+        assert_eq!(m.minor(1, 0), 25.0);
+        assert_eq!(m.cofactor(1, 0), -25.0);
+    }
+
+    #[test]
+    fn determinant_of_matrix3() {
+        #[rustfmt::skip]
+        let m: Matrix3 = mat![
+            1.0, 2.0, 6.0,
+            -5.0, 8.0, -4.0,
+            2.0, 6.0, 4.0,
+        ];
+
+        assert_eq!(m.determinant(), -196.0);
+    }
+
+    #[test]
+    fn determinant_of_matrix4() {
+        #[rustfmt::skip]
+		let m: Matrix4 = mat![
+			-2.0, -8.0, 3.0, 5.0,
+			-3.0, 1.0, 7.0, 3.0,
+			1.0, 2.0, -9.0, 6.0,
+			-6.0, 7.0, 7.0, -9.0,
+		];
+
+        assert_eq!(m.cofactor(0, 0), 690.0);
+        assert_eq!(m.cofactor(0, 1), 447.0);
+        assert_eq!(m.cofactor(0, 2), 210.0);
+        assert_eq!(m.cofactor(0, 3), 51.0);
+        assert_eq!(m.determinant(), -4071.0);
+    }
+
+    #[test]
+    fn inverse_of_matrix4() {
+        #[rustfmt::skip]
+		let m: Matrix4 = mat![
+			-5.0, 2.0, 6.0, -8.0,
+			1.0, -5.0, 1.0, 8.0,
+			7.0, 7.0, -6.0, -7.0,
+			1.0, -3.0, 7.0, 4.0,
+		];
+
+        assert_eq!(m.determinant(), 532.0);
+        assert_eq!(m.cofactor(2, 3), -160.0);
+        assert_eq!(m.cofactor(3, 2), 105.0);
+
+        #[rustfmt::skip]
+		let expected: Matrix4 = mat![
+			0.21805, 0.45113, 0.24060, -0.04511,
+			-0.80827, -1.45677, -0.44361, 0.52068,
+			-0.07895, -0.22368, -0.05263, 0.19737,
+			-0.52256, -0.81391, -0.30075, 0.30639,
+		];
+
+        assert_almost_eq_mat(m.inverse().unwrap(), expected);
     }
 }
