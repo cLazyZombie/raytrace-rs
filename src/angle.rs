@@ -1,36 +1,44 @@
+use std::f32::consts::PI;
+
+/// stores angle as radian
 #[derive(Copy, Clone, Debug)]
-pub enum Angle {
-    Radian(f32),
-    Degree(f32),
-}
+pub struct Angle(f32);
 
 impl Angle {
     pub fn from_radian(radian: f32) -> Self {
-        Angle::Radian(radian)
+        Angle(radian)
     }
 
     pub fn from_degree(degree: f32) -> Self {
-        Angle::Degree(degree)
+        let radian = degree.to_radians();
+        Angle(radian)
     }
 
     pub fn radian(&self) -> f32 {
-        match self {
-            &Angle::Degree(degree) => f32::to_radians(degree),
-            &Angle::Radian(radian) => radian,
-        }
+        self.0
     }
 
     pub fn degree(&self) -> f32 {
-        match self {
-            &Angle::Degree(degree) => degree,
-            &Angle::Radian(radian) => f32::to_degrees(radian),
-        }
+        self.0.to_degrees()
     }
 
-    // pub fn almost_eq(&self, other: Angle) -> bool {
-    // 	let rad1 = self.radian();
-    // 	let rad2 = other.radian();
-    // }
+    /// make radians in [0, 2*PI)
+    pub fn normalize(self) -> Self {
+        let mut radian = self.0 % (PI * 2.0);
+        if radian < 0.0 {
+            radian += PI * 2.0;
+        }
+        Self::from_radian(radian)
+    }
+
+    /// make radians in [-PI, PI)
+    pub fn normalize_signed(self) -> Self {
+        let mut radian = self.normalize().0;
+        if radian >= PI * 2.0 {
+            radian -= PI * 2.0;
+        }
+        Self::from_radian(radian)
+    }
 }
 
 #[cfg(test)]
