@@ -16,8 +16,8 @@ fn main() {
     let mut canvas = Canvas::new(width, height);
 
     let near_z = 1.0;
-    let near_width = 1.0;
-    let near_height = 1.0;
+    let near_width = 0.4;
+    let near_height = 0.4;
 
     for ix in 0..width {
         for iy in 0..height {
@@ -46,33 +46,6 @@ fn main() {
 
                     canvas.write_pixel(ix, iy, color);
                 }
-            }
-        }
-    }
-
-    {
-        let x = 480.0;
-        let y = 480.0;
-        // calc ray
-
-        // plane pos
-        let x = ((x / ((width - 1) as f32)) - 0.5) * 2.0; // -1 to 1
-        let y = ((y / ((height - 1) as f32)) - 0.5) * -2.0; // -1 to 1
-        let dirv = vector(x * near_width * 0.5, y * near_height * 0.5, near_z).normalize();
-
-        let ray = dbg!(Ray::new(eye, dirv));
-
-        let mut xs = dbg!(ray.intersect_sphere(&sphere));
-        xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-        // 가깝지만 뒤로 넘어가지 않는 위치를 구한다
-        if xs.len() > 0 {
-            let c = xs.iter().filter(|&&t| t > 0.0).next();
-            if let Some(&t) = c {
-                let pos = dbg!(ray.position(t));
-                let normalv = dbg!(sphere.normal_at(pos));
-
-                dbg!(point_lighting(&sphere.mat, &light, pos, eyev, normalv));
             }
         }
     }
