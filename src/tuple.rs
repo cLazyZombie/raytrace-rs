@@ -55,6 +55,12 @@ impl Vec4 {
             self[0] * rhs[1] - self[1] * rhs[0],
         )
     }
+
+    pub fn reflect(&self, normal: Vec4) -> Self {
+        assert!(self.is_vector());
+
+        *self - normal * 2.0 * self.dot(normal)
+    }
 }
 
 impl<const N: usize> Index<usize> for Tuple<N> {
@@ -269,5 +275,21 @@ mod tests {
         let b = vector(2.0, 3.0, 4.0);
         assert_almost_eq_tuple(a.cross(b), vector(-1.0, 2.0, -1.0));
         assert_almost_eq_tuple(b.cross(a), vector(1.0, -2.0, 1.0));
+    }
+
+    #[test]
+    fn relect_vector_approaching_45_degrees() {
+        let v = vector(1.0, -1.0, 0.0);
+        let n = vector(0.0, 1.0, 0.0);
+        let reflect = v.reflect(n);
+        assert_almost_eq_tuple(reflect, vector(1.0, 1.0, 0.0));
+    }
+
+    #[test]
+    fn reflecting_vector_off_slanted_surface() {
+        let v = vector(0.0, -1.0, 0.0);
+        let n = vector(f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0);
+        let r = v.reflect(n);
+        assert_almost_eq_tuple(r, vector(1.0, 0.0, 0.0));
     }
 }
