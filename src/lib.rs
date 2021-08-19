@@ -25,6 +25,9 @@ pub use material::*;
 mod point_light;
 pub use point_light::*;
 
+mod intersection;
+pub use intersection::*;
+
 #[cfg(test)]
 mod lib_test;
 

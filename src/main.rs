@@ -1,5 +1,6 @@
 use raytrace_rs::{
-    point, point_lighting, vector, Canvas, Color, Material, PointLight, Ray, Sphere,
+    get_frontmost_intersection, point, point_lighting, vector, Canvas, Color, Intersection,
+    Material, PointLight, Ray, Sphere,
 };
 
 fn main() {
@@ -32,20 +33,28 @@ fn main() {
 
             let ray = Ray::new(eye, dirv);
 
-            let mut xs = ray.intersect_sphere(&sphere);
-            xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
-
-            // 가깝지만 뒤로 넘어가지 않는 위치를 구한다
-            if xs.len() > 0 {
-                let c = xs.iter().filter(|&&t| t > 0.0).next();
-                if let Some(&t) = c {
-                    let pos = ray.position(t);
+            // ray와 hit되는 intersection들을 구한다
+            let intersections: Vec<_> = ray
+                .intersect_sphere(&sphere)
+                .iter()
+                .map(|t| {
+                    let pos = ray.position(*t);
                     let normalv = sphere.normal_at(pos);
+                    Intersection::new(*t, pos, normalv, &sphere.mat)
+                })
+                .collect();
 
-                    let color = point_lighting(&sphere.mat, &light, pos, eyev, normalv);
-
-                    canvas.write_pixel(ix, iy, color);
-                }
+            // 가장 앞에 있는 hit를 구한다
+            let frontmost = get_frontmost_intersection(intersections);
+            if let Some(frontmost) = frontmost {
+                let color = point_lighting(
+                    frontmost.material,
+                    &light,
+                    frontmost.pos,
+                    eyev,
+                    frontmost.normalv,
+                );
+                canvas.write_pixel(ix, iy, color);
             }
         }
     }
