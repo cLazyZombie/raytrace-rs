@@ -1,18 +1,33 @@
-use crate::Vec4;
+use crate::{point, Material, Vec4};
 
 pub struct Sphere {
     pub center: Vec4,
     pub r: f32,
+    pub mat: Material,
 }
 
 impl Sphere {
     pub fn new(center: Vec4, r: f32) -> Self {
-        Self { center, r }
+        Self {
+            center,
+            r,
+            ..Default::default()
+        }
     }
 
     pub fn normal_at(&self, p: Vec4) -> Vec4 {
         let dir = p - self.center;
         dir.normalize()
+    }
+}
+
+impl Default for Sphere {
+    fn default() -> Self {
+        Self {
+            center: point(0.0, 0.0, 0.0),
+            r: 1.0,
+            mat: Default::default(),
+        }
     }
 }
 

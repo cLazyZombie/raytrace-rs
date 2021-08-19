@@ -19,6 +19,12 @@ pub use ray::*;
 mod sphere;
 pub use sphere::*;
 
+mod material;
+pub use material::*;
+
+mod point_light;
+pub use point_light::*;
+
 #[cfg(test)]
 mod lib_test;
 
