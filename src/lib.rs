@@ -13,6 +13,12 @@ pub use color::*;
 mod canvas;
 pub use canvas::*;
 
+mod ray;
+pub use ray::*;
+
+mod sphere;
+pub use sphere::*;
+
 #[cfg(test)]
 mod lib_test;
 

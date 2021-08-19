@@ -5,6 +5,9 @@ pub struct Tuple<const N: usize> {
     values: [f32; N],
 }
 
+pub type Vec4 = Tuple<4>;
+pub type Vec3 = Tuple<3>;
+
 impl<const N: usize> Tuple<N> {
     pub fn new(values: [f32; N]) -> Self {
         Self { values }
@@ -36,7 +39,7 @@ impl<const N: usize> Tuple<N> {
     }
 }
 
-impl Tuple<4> {
+impl Vec4 {
     pub fn is_point(&self) -> bool {
         self.values[3] != 0.0
     }
