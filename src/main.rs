@@ -4,11 +4,13 @@ use raytrace_rs::{
 
 fn main() {
     let eye = point(0.0, 0.0, 0.0);
+    let eyev = point(0.0, 0.0, 1.0);
 
     let light = PointLight::new(point(-5.0, 5.0, 5.0), Color::WHITE);
 
     let mut sphere = Sphere::new(point(0.0, 0.0, 10.0), 1.0);
-    sphere.mat = Material::new(Color::new(1.0, 0.0, 0.0), 0.1, 0.7, 0.8, 200.0);
+    //sphere.mat = Material::new(Color::new(0.8, 0.4, 0.2), 0.1, 0.7, 10.0, 200.0);
+    sphere.mat = Material::new(Color::new(0.8, 0.4, 0.2), 0.2, 0.8, 1.0, 100.0);
 
     let (width, height) = (1024, 1024);
     let mut canvas = Canvas::new(width, height);
@@ -40,10 +42,37 @@ fn main() {
                     let pos = ray.position(t);
                     let normalv = sphere.normal_at(pos);
 
-                    let color = point_lighting(&sphere.mat, &light, pos, dirv, normalv);
+                    let color = point_lighting(&sphere.mat, &light, pos, eyev, normalv);
 
                     canvas.write_pixel(ix, iy, color);
                 }
+            }
+        }
+    }
+
+    {
+        let x = 480.0;
+        let y = 480.0;
+        // calc ray
+
+        // plane pos
+        let x = ((x / ((width - 1) as f32)) - 0.5) * 2.0; // -1 to 1
+        let y = ((y / ((height - 1) as f32)) - 0.5) * -2.0; // -1 to 1
+        let dirv = vector(x * near_width * 0.5, y * near_height * 0.5, near_z).normalize();
+
+        let ray = dbg!(Ray::new(eye, dirv));
+
+        let mut xs = dbg!(ray.intersect_sphere(&sphere));
+        xs.sort_by(|a, b| a.partial_cmp(b).unwrap());
+
+        // 가깝지만 뒤로 넘어가지 않는 위치를 구한다
+        if xs.len() > 0 {
+            let c = xs.iter().filter(|&&t| t > 0.0).next();
+            if let Some(&t) = c {
+                let pos = dbg!(ray.position(t));
+                let normalv = dbg!(sphere.normal_at(pos));
+
+                dbg!(point_lighting(&sphere.mat, &light, pos, eyev, normalv));
             }
         }
     }

@@ -37,9 +37,9 @@ impl Canvas {
             let (x, y) = Self::get_xy(self.width, idx as u32);
 
             let color = image::Rgb([
-                (color.red * 255.0) as u8,
-                (color.green * 255.0) as u8,
-                (color.blue * 255.0) as u8,
+                (color.red.clamp(0.0, 1.0) * 255.0) as u8,
+                (color.green.clamp(0.0, 1.0) * 255.0) as u8,
+                (color.blue.clamp(0.0, 1.0) * 255.0) as u8,
             ]);
 
             *image.get_pixel_mut(x, y) = color;

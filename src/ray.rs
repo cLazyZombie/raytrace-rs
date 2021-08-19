@@ -1,5 +1,6 @@
 use crate::{Sphere, Vec4};
 
+#[derive(Debug)]
 pub struct Ray {
     pub origin: Vec4,
     pub dir: Vec4,

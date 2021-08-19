@@ -32,7 +32,7 @@ pub fn point_lighting(
         diffuse = effective_color * material.diffuse * light_dot_normal;
 
         let reflectv = (-lightv).reflect(normalv);
-        let reflect_dot_eye = reflectv.dot(eyev);
+        let reflect_dot_eye = reflectv.dot(-eyev);
         if reflect_dot_eye <= 0.0 {
             specular = Color::BLACK;
         } else {
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn lighting_with_the_eye_between_light_and_surface() {
-        let eyev = vector(0.0, 0.0, -1.0);
+        let eyev = vector(0.0, 0.0, 1.0);
         let normalv = vector(0.0, 0.0, -1.0);
         let position = point(0.0, 0.0, 0.0);
         let light = PointLight::new(point(0.0, 0.0, -10.0), Color::WHITE);
