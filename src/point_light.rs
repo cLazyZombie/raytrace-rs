@@ -11,13 +11,7 @@ impl PointLight {
     }
 }
 
-pub fn point_lighting(
-    material: &Material,
-    light: &PointLight,
-    position: Vec4,
-    eyev: Vec4,
-    normalv: Vec4,
-) -> Color {
+pub fn point_lighting(material: &Material, light: &PointLight, position: Vec4, eyev: Vec4, normalv: Vec4) -> Color {
     let effective_color = material.color * light.intensity;
     let lightv = (light.pos - position).normalize();
     let ambient = effective_color * material.ambient;

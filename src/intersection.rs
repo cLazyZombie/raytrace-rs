@@ -19,9 +19,7 @@ impl<'a> Intersection<'a> {
     }
 }
 
-pub fn get_frontmost_intersection<'a>(
-    mut intersections: Vec<Intersection<'a>>,
-) -> Option<Intersection<'a>> {
+pub fn get_frontmost_intersection<'a>(mut intersections: Vec<Intersection<'a>>) -> Option<Intersection<'a>> {
     intersections.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
     let first = intersections.iter().filter(|a| a.t > 0.0).next();
 

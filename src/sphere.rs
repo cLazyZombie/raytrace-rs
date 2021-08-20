@@ -1,4 +1,4 @@
-use crate::{point, Material, Vec4};
+use crate::{point, Intersection, Material, Object, Vec4};
 
 pub struct Sphere {
     pub center: Vec4,
@@ -18,6 +18,19 @@ impl Sphere {
     pub fn normal_at(&self, p: Vec4) -> Vec4 {
         let dir = p - self.center;
         dir.normalize()
+    }
+}
+
+impl Object for Sphere {
+    fn ray_intersect(&self, ray: &crate::Ray) -> Vec<crate::Intersection> {
+        let ts = ray.intersect_sphere(self);
+        ts.iter()
+            .map(|t| {
+                let pos = ray.position(*t);
+                let normalv = self.normal_at(pos);
+                Intersection::new(*t, pos, normalv, &self.mat)
+            })
+            .collect()
     }
 }
 

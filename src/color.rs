@@ -33,11 +33,7 @@ impl Add for Color {
     type Output = Color;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Color::new(
-            self.red + rhs.red,
-            self.green + rhs.green,
-            self.blue + rhs.blue,
-        )
+        Color::new(self.red + rhs.red, self.green + rhs.green, self.blue + rhs.blue)
     }
 }
 
@@ -45,11 +41,7 @@ impl Sub for Color {
     type Output = Color;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Color::new(
-            self.red - rhs.red,
-            self.green - rhs.green,
-            self.blue - rhs.blue,
-        )
+        Color::new(self.red - rhs.red, self.green - rhs.green, self.blue - rhs.blue)
     }
 }
 
@@ -73,11 +65,7 @@ impl Mul for Color {
     type Output = Color;
 
     fn mul(self, rhs: Self) -> Self::Output {
-        Color::new(
-            self.red * rhs.red,
-            self.green * rhs.green,
-            self.blue * rhs.blue,
-        )
+        Color::new(self.red * rhs.red, self.green * rhs.green, self.blue * rhs.blue)
     }
 }
 

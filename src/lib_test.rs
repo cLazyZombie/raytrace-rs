@@ -19,10 +19,7 @@ pub(crate) fn assert_almost_eq_color(lhs: Color, rhs: Color) {
     assert!(eq1 && eq2 && eq3, "{:?} is not equal to {:?}", lhs, rhs);
 }
 
-pub(crate) fn assert_almost_eq_mat<const R: usize, const C: usize>(
-    lhs: Matrix<R, C>,
-    rhs: Matrix<R, C>,
-) {
+pub(crate) fn assert_almost_eq_mat<const R: usize, const C: usize>(lhs: Matrix<R, C>, rhs: Matrix<R, C>) {
     let eq = Matrix::<R, C>::almost_eq(lhs, rhs);
     assert!(eq, "{:?} it not equal to {:?}", lhs, rhs);
 }

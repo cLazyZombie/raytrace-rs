@@ -465,8 +465,7 @@ mod tests {
 
     #[test]
     fn multiply_matrix_by_identity_matrix() {
-        let m1: Matrix4 =
-            mat![1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,];
+        let m1: Matrix4 = mat![1.0, 2.0, 3.0, 4.0, 2.0, 4.0, 4.0, 2.0, 8.0, 6.0, 4.0, 1.0, 0.0, 0.0, 0.0, 1.0,];
 
         let m2: Matrix4 = Matrix::identity();
 
@@ -649,10 +648,7 @@ mod tests {
         let half_quater = Matrix::rotation_x(Angle::from_degree(45.0));
         let full_quater = Matrix::rotation_x(Angle::from_degree(90.0));
 
-        assert_almost_eq_tuple(
-            half_quater * p,
-            point(0.0, f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0),
-        );
+        assert_almost_eq_tuple(half_quater * p, point(0.0, f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0));
 
         assert_almost_eq_tuple(full_quater * p, point(0.0, 0.0, 1.0));
     }
@@ -663,10 +659,7 @@ mod tests {
         let half_quater = Matrix::rotation_y(Angle::from_degree(45.0));
         let full_quater = Matrix::rotation_y(Angle::from_degree(90.0));
 
-        assert_almost_eq_tuple(
-            half_quater * p,
-            point(f32::sqrt(2.0) / 2.0, 0.0, f32::sqrt(2.0) / 2.0),
-        );
+        assert_almost_eq_tuple(half_quater * p, point(f32::sqrt(2.0) / 2.0, 0.0, f32::sqrt(2.0) / 2.0));
         assert_almost_eq_tuple(full_quater * p, point(1.0, 0.0, 0.0));
     }
 
@@ -676,10 +669,7 @@ mod tests {
         let half_quater = Matrix::rotation_z(Angle::from_degree(45.0));
         let full_quater = Matrix::rotation_z(Angle::from_degree(90.0));
 
-        assert_almost_eq_tuple(
-            half_quater * p,
-            point(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0),
-        );
+        assert_almost_eq_tuple(half_quater * p, point(-f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0));
         assert_almost_eq_tuple(full_quater * p, point(-1.0, 0.0, 0.0));
     }
 

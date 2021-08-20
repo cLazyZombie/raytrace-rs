@@ -28,6 +28,12 @@ pub use point_light::*;
 mod intersection;
 pub use intersection::*;
 
+mod world;
+pub use world::*;
+
+mod object;
+pub use object::*;
+
 #[cfg(test)]
 mod lib_test;
 

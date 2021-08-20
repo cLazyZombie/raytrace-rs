@@ -1,6 +1,6 @@
 use raytrace_rs::{
-    get_frontmost_intersection, point, point_lighting, vector, Canvas, Color, Intersection,
-    Material, PointLight, Ray, Sphere,
+    get_frontmost_intersection, point, point_lighting, vector, Canvas, Color, Intersection, Material, PointLight, Ray,
+    Sphere,
 };
 
 fn main() {
@@ -47,13 +47,7 @@ fn main() {
             // 가장 앞에 있는 hit를 구한다
             let frontmost = get_frontmost_intersection(intersections);
             if let Some(frontmost) = frontmost {
-                let color = point_lighting(
-                    frontmost.material,
-                    &light,
-                    frontmost.pos,
-                    eyev,
-                    frontmost.normalv,
-                );
+                let color = point_lighting(frontmost.material, &light, frontmost.pos, eyev, frontmost.normalv);
                 canvas.write_pixel(ix, iy, color);
             }
         }

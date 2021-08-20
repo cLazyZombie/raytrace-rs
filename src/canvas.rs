@@ -9,11 +9,7 @@ pub struct Canvas {
 impl Canvas {
     pub fn new(width: u32, height: u32) -> Self {
         let buff = vec![Color::new(0.0, 0.0, 0.0); (width * height) as usize];
-        Self {
-            width,
-            height,
-            buff,
-        }
+        Self { width, height, buff }
     }
 
     pub fn pixel_at(&self, x: u32, y: u32) -> Color {

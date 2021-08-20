@@ -156,15 +156,11 @@ impl<const N: usize> Div<f32> for Tuple<N> {
 }
 
 pub fn vector(x: f32, y: f32, z: f32) -> Tuple<4> {
-    Tuple {
-        values: [x, y, z, 0.0],
-    }
+    Tuple { values: [x, y, z, 0.0] }
 }
 
 pub fn point(x: f32, y: f32, z: f32) -> Tuple<4> {
-    Tuple {
-        values: [x, y, z, 1.0],
-    }
+    Tuple { values: [x, y, z, 1.0] }
 }
 
 #[cfg(test)]
