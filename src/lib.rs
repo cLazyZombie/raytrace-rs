@@ -19,6 +19,9 @@ pub use ray::*;
 mod sphere;
 pub use sphere::*;
 
+mod aabb;
+pub use aabb::*;
+
 mod material;
 pub use material::*;
 
@@ -33,6 +36,9 @@ pub use world::*;
 
 mod object;
 pub use object::*;
+
+mod camera;
+pub use camera::*;
 
 #[cfg(test)]
 mod lib_test;

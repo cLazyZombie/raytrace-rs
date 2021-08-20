@@ -1,4 +1,4 @@
-use crate::{Sphere, Vec4};
+use crate::{Aabb, Sphere, Tuple, Vec4};
 
 #[derive(Debug)]
 pub struct Ray {
@@ -38,6 +38,23 @@ impl Ray {
             result.push(t2);
             result
             // }
+        }
+    }
+
+    pub fn intersect_aabb(&self, aabb: &Aabb) -> Vec<f32> {
+        let t_min = (aabb.min - self.origin) / self.dir;
+        let t_max = (aabb.max - self.origin) / self.dir;
+
+        let t1 = Tuple::min(t_min, t_max);
+        let t2 = Tuple::max(t_min, t_max);
+
+        let near = f32::max(f32::max(t1[0], t1[1]), t1[2]);
+        let far = f32::min(f32::min(t2[0], t2[1]), t2[2]);
+
+        if near > far {
+            Vec::new()
+        } else {
+            vec![near, far]
         }
     }
 }

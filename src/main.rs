@@ -1,7 +1,21 @@
-use raytrace_rs::{point, vector, Canvas, Color, Material, PointLight, Ray, Sphere, World};
+use raytrace_rs::{
+    point, vector, view_transform, Aabb, Angle, Camera, Canvas, Color, Material, PointLight, Sphere, World,
+};
 
 fn main() {
-    let eye = point(0.0, 0.0, 0.0);
+    let (width, height): (u32, u32) = (1600, 900);
+
+    let eye = point(0.0, 3.0, 7.0);
+    let target = point(0.0, 0.0, 12.0);
+    let up = vector(0.0, 1.0, 0.0);
+    let view_mat = view_transform(eye, target, up);
+    let camera = Camera::new(
+        width,
+        height,
+        Angle::from_degree(60.0),
+        (width as f32) / (height as f32),
+        view_mat,
+    );
 
     let mut world = World::new();
 
@@ -19,27 +33,16 @@ fn main() {
     sphere2.mat = Material::new(Color::new(0.2, 0.8, 0.4), 0.1, 0.6, 1.0, 200.0);
     world.add_object(sphere2);
 
-    let (width, height) = (1024, 1024);
-    let mut canvas = Canvas::new(width, height);
+    let mut aabb = Aabb::new(point(-15.0, -15.0, -15.0), point(15.0, 15.0, 15.0), false);
+    aabb.mat = Material::new(Color::new(0.2, 0.2, 0.2), 0.1, 0.2, 0.3, 100.0);
+    world.add_object(aabb);
 
-    let near_z = 1.0;
-    let near_width = 0.4;
-    let near_height = 0.4;
+    let mut canvas = Canvas::new(width, height);
 
     for ix in 0..width {
         for iy in 0..height {
-            let x = ix as f32;
-            let y = iy as f32;
-            // calc ray
-
-            // plane pos
-            let x = ((x / ((width - 1) as f32)) - 0.5) * 2.0; // -1 to 1
-            let y = ((y / ((height - 1) as f32)) - 0.5) * -2.0; // -1 to 1
-            let dirv = vector(x * near_width * 0.5, y * near_height * 0.5, near_z).normalize();
-
-            let ray = Ray::new(eye, dirv);
-
-            let color = world.shade(&ray);
+            let ray = camera.get_ray(ix, iy);
+            let color = world.shade(&ray, camera.dir());
             canvas.write_pixel(ix, iy, color);
         }
     }

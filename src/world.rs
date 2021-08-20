@@ -1,4 +1,4 @@
-use crate::{point, point_lighting, vector, Color, Intersection, Material, Object, PointLight, Ray, Sphere};
+use crate::{point, point_lighting, Color, Intersection, Material, Object, PointLight, Ray, Sphere, Vec4};
 
 pub struct World {
     pub objects: Vec<Box<dyn Object>>,
@@ -32,7 +32,7 @@ impl World {
         intersections
     }
 
-    pub fn shade(&self, ray: &Ray) -> Color {
+    pub fn shade(&self, ray: &Ray, eyev: Vec4) -> Color {
         let intersections = self.intersect(ray);
 
         if intersections.len() == 0 {
@@ -42,13 +42,7 @@ impl World {
             if let Some(front_most) = front_most {
                 let mut acc_color = Color::BLACK;
                 for light in &self.point_lights {
-                    acc_color += point_lighting(
-                        front_most.material,
-                        light,
-                        front_most.pos,
-                        vector(0.0, 0.0, 1.0),
-                        front_most.normalv,
-                    );
+                    acc_color += point_lighting(front_most.material, light, front_most.pos, eyev, front_most.normalv);
                 }
                 acc_color
             } else {
@@ -117,7 +111,7 @@ mod tests {
     fn shade_world_with_ray() {
         let world = World::default();
         let ray = Ray::new(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
-        let color = world.shade(&ray);
-        assert_almost_eq_color(color, Color::BLACK);
+        let color = world.shade(&ray, vector(0.0, 0.0, 1.0));
+        assert_almost_eq_color(color, Color::new(0.46066123, 0.11516531, 0.34549594));
     }
 }

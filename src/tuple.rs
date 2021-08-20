@@ -37,6 +37,30 @@ impl<const N: usize> Tuple<N> {
         }
         dot
     }
+
+    pub fn min(lhs: Self, rhs: Self) -> Self {
+        let mut result = lhs;
+
+        for n in 0..N {
+            if rhs[n] < lhs[n] {
+                result[n] = rhs[n]
+            }
+        }
+
+        result
+    }
+
+    pub fn max(lhs: Self, rhs: Self) -> Self {
+        let mut result = lhs;
+
+        for n in 0..N {
+            if rhs[n] > lhs[n] {
+                result[n] = rhs[n]
+            }
+        }
+
+        result
+    }
 }
 
 impl Vec4 {
@@ -150,6 +174,18 @@ impl<const N: usize> Div<f32> for Tuple<N> {
         let mut result = Self::Output::default();
         for n in 0..N {
             result[n] = self[n] / rhs;
+        }
+        result
+    }
+}
+
+impl<const N: usize> Div<Tuple<N>> for Tuple<N> {
+    type Output = Tuple<N>;
+
+    fn div(self, rhs: Tuple<N>) -> Self::Output {
+        let mut result = Self::Output::default();
+        for n in 0..N {
+            result[n] = self[n] / rhs[n];
         }
         result
     }
@@ -287,5 +323,16 @@ mod tests {
         let n = vector(f32::sqrt(2.0) / 2.0, f32::sqrt(2.0) / 2.0, 0.0);
         let r = v.reflect(n);
         assert_almost_eq_tuple(r, vector(1.0, 0.0, 0.0));
+    }
+
+    #[test]
+    fn test_div_by_zero_tuple() {
+        let a = point(1.0, 1.0, 1.0);
+        let b = vector(0.0, 0.0, 0.0);
+
+        let c = a / b;
+        assert!(c[0].is_infinite());
+        assert!(c[1].is_infinite());
+        assert!(c[2].is_infinite());
     }
 }
