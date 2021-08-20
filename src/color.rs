@@ -1,4 +1,4 @@
-use std::ops::{Add, Mul, Sub};
+use std::ops::{Add, AddAssign, Mul, Sub};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Color {
@@ -69,6 +69,12 @@ impl Mul for Color {
     }
 }
 
+impl AddAssign for Color {
+    fn add_assign(&mut self, rhs: Self) {
+        *self = *self + rhs;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assert_almost_eq_color;
@@ -109,5 +115,13 @@ mod tests {
         let c1 = Color::new(1.0, 0.2, 0.4);
         let c2 = Color::new(0.9, 1.0, 0.1);
         assert_almost_eq_color(c1 * c2, Color::new(0.9, 0.2, 0.04));
+    }
+
+    #[test]
+    fn add_assign() {
+        let mut c1 = Color::new(0.1, 0.2, 0.3);
+        let c2 = Color::new(0.4, 0.5, 0.6);
+        c1 += c2;
+        assert_almost_eq_color(c1, Color::new(0.5, 0.7, 0.9));
     }
 }

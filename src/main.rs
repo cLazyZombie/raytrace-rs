@@ -1,17 +1,23 @@
-use raytrace_rs::{
-    get_frontmost_intersection, point, point_lighting, vector, Canvas, Color, Intersection, Material, PointLight, Ray,
-    Sphere,
-};
+use raytrace_rs::{point, vector, Canvas, Color, Material, PointLight, Ray, Sphere, World};
 
 fn main() {
     let eye = point(0.0, 0.0, 0.0);
-    let eyev = point(0.0, 0.0, 1.0);
 
-    let light = PointLight::new(point(-5.0, 5.0, 5.0), Color::WHITE);
+    let mut world = World::new();
 
-    let mut sphere = Sphere::new(point(0.0, 0.0, 10.0), 1.0);
-    //sphere.mat = Material::new(Color::new(0.8, 0.4, 0.2), 0.1, 0.7, 10.0, 200.0);
-    sphere.mat = Material::new(Color::new(0.8, 0.4, 0.2), 0.2, 0.8, 1.0, 100.0);
+    let light1 = PointLight::new(point(-5.0, 5.0, 5.0), Color::WHITE);
+    world.add_pointlight(light1);
+
+    let light2 = PointLight::new(point(5.0, -5.0, 5.0), Color::new(1.0, 0.2, 0.4));
+    world.add_pointlight(light2);
+
+    let mut sphere1 = Sphere::new(point(-0.5, 0.0, 10.0), 1.0);
+    sphere1.mat = Material::new(Color::new(0.8, 0.4, 0.2), 0.2, 0.8, 1.0, 200.0);
+    world.add_object(sphere1);
+
+    let mut sphere2 = Sphere::new(point(1.2, 0.0, 13.0), 0.7);
+    sphere2.mat = Material::new(Color::new(0.2, 0.8, 0.4), 0.1, 0.6, 1.0, 200.0);
+    world.add_object(sphere2);
 
     let (width, height) = (1024, 1024);
     let mut canvas = Canvas::new(width, height);
@@ -33,23 +39,8 @@ fn main() {
 
             let ray = Ray::new(eye, dirv);
 
-            // ray와 hit되는 intersection들을 구한다
-            let intersections: Vec<_> = ray
-                .intersect_sphere(&sphere)
-                .iter()
-                .map(|t| {
-                    let pos = ray.position(*t);
-                    let normalv = sphere.normal_at(pos);
-                    Intersection::new(*t, pos, normalv, &sphere.mat)
-                })
-                .collect();
-
-            // 가장 앞에 있는 hit를 구한다
-            let frontmost = get_frontmost_intersection(intersections);
-            if let Some(frontmost) = frontmost {
-                let color = point_lighting(frontmost.material, &light, frontmost.pos, eyev, frontmost.normalv);
-                canvas.write_pixel(ix, iy, color);
-            }
+            let color = world.shade(&ray);
+            canvas.write_pixel(ix, iy, color);
         }
     }
 

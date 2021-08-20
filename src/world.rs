@@ -1,4 +1,4 @@
-use crate::{point, Color, Intersection, Material, Object, PointLight, Ray, Sphere};
+use crate::{point, point_lighting, vector, Color, Intersection, Material, Object, PointLight, Ray, Sphere};
 
 pub struct World {
     pub objects: Vec<Box<dyn Object>>,
@@ -31,6 +31,31 @@ impl World {
         intersections.sort_by(|a, b| a.t.partial_cmp(&b.t).unwrap());
         intersections
     }
+
+    pub fn shade(&self, ray: &Ray) -> Color {
+        let intersections = self.intersect(ray);
+
+        if intersections.len() == 0 {
+            Color::BLACK
+        } else {
+            let front_most = intersections.iter().filter(|i| i.t > 0.0).next();
+            if let Some(front_most) = front_most {
+                let mut acc_color = Color::BLACK;
+                for light in &self.point_lights {
+                    acc_color += point_lighting(
+                        front_most.material,
+                        light,
+                        front_most.pos,
+                        vector(0.0, 0.0, 1.0),
+                        front_most.normalv,
+                    );
+                }
+                acc_color
+            } else {
+                Color::BLACK
+            }
+        }
+    }
 }
 
 impl Default for World {
@@ -54,7 +79,10 @@ impl Default for World {
 
 #[cfg(test)]
 mod tests {
-    use crate::{lib_test::assert_almost_eq_f32, vector, Ray};
+    use crate::{
+        lib_test::{assert_almost_eq_color, assert_almost_eq_f32},
+        vector, Ray,
+    };
 
     use super::*;
 
@@ -83,5 +111,13 @@ mod tests {
         assert_almost_eq_f32(intersects[1].t, 4.5);
         assert_almost_eq_f32(intersects[2].t, 5.5);
         assert_almost_eq_f32(intersects[3].t, 6.0);
+    }
+
+    #[test]
+    fn shade_world_with_ray() {
+        let world = World::default();
+        let ray = Ray::new(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
+        let color = world.shade(&ray);
+        assert_almost_eq_color(color, Color::BLACK);
     }
 }
