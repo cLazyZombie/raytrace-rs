@@ -42,7 +42,7 @@ impl Aabb {
 
 fn nearly_close(a: f32, b: f32) -> bool {
     let diff = (a - b).abs();
-    return diff < 0.1;
+    return diff < 0.001;
 }
 
 impl Object for Aabb {
