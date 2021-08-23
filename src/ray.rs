@@ -131,4 +131,79 @@ mod tests {
         assert_almost_eq_f32(xs[0], -6.0);
         assert_almost_eq_f32(xs[1], -4.0);
     }
+
+    #[test]
+    fn ray_aabb_intersect() {
+        // x -> []
+        let ray = Ray::new(point(0.0, 0.0, 0.0), vector(0.0, 0.0, 1.0));
+        let aabb = Aabb::new(point(-10.0, -10.0, 10.0), point(10.0, 10.0, 20.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+
+        // z [ ->? ]
+        let ray = Ray::new(point(0.0, 0.0, 15.0), vector(0.0, 0.0, 1.0));
+        let aabb = Aabb::new(point(-10.0, -10.0, 10.0), point(10.0, 10.0, 20.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], -5.0);
+        assert_almost_eq_f32(xs[1], 5.0);
+
+        // z [] <-
+        let ray = Ray::new(point(0.0, 0.0, 30.0), vector(0.0, 0.0, -1.0));
+        let aabb = Aabb::new(point(-10.0, -10.0, 10.0), point(10.0, 10.0, 20.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+
+        // z -> []
+        let ray = Ray::new(point(0.0, 0.0, 0.0), vector(0.0, 1.0, 0.0));
+        let aabb = Aabb::new(point(-10.0, 10.0, -10.0), point(10.0, 20.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+
+        // y [ ->? ]
+        let ray = Ray::new(point(0.0, 15.0, 0.0), vector(0.0, 1.0, 0.0));
+        let aabb = Aabb::new(point(-10.0, 10.0, -10.0), point(10.0, 20.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], -5.0);
+        assert_almost_eq_f32(xs[1], 5.0);
+
+        // y [] <-
+        let ray = Ray::new(point(0.0, 30.0, 0.0), vector(0.0, -1.0, 0.0));
+        let aabb = Aabb::new(point(-10.0, 10.0, -10.0), point(10.0, 20.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+
+        // x -> []
+        let ray = Ray::new(point(0.0, 0.0, 0.0), vector(1.0, 0.0, 0.0));
+        let aabb = Aabb::new(point(10.0, -10.0, -10.0), point(20.0, 10.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+
+        // x [ ->? ]
+        let ray = Ray::new(point(15.0, 0.0, 0.0), vector(1.0, 0.0, 0.0));
+        let aabb = Aabb::new(point(10.0, -10.0, -10.0), point(20.0, 10.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], -5.0);
+        assert_almost_eq_f32(xs[1], 5.0);
+
+        // x [] <-
+        let ray = Ray::new(point(30.0, 0.0, 0.0), vector(-1.0, 0.0, 0.0));
+        let aabb = Aabb::new(point(10.0, -10.0, -10.0), point(20.0, 10.0, 10.0), true);
+        let xs = ray.intersect_aabb(&aabb);
+        assert_eq!(xs.len(), 2);
+        assert_almost_eq_f32(xs[0], 10.0);
+        assert_almost_eq_f32(xs[1], 20.0);
+    }
 }
