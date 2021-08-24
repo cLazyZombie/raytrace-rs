@@ -11,7 +11,18 @@ impl PointLight {
     }
 }
 
-pub fn point_lighting(material: &Material, light: &PointLight, position: Vec4, eyev: Vec4, normalv: Vec4) -> Color {
+pub fn point_lighting(
+    material: &Material,
+    light: &PointLight,
+    position: Vec4,
+    eyev: Vec4,
+    normalv: Vec4,
+    is_shadowed: bool,
+) -> Color {
+    if is_shadowed {
+        return material.ambient * material.color;
+    }
+
     let effective_color = material.color * light.intensity;
     let lightv = (light.pos - position).normalize();
     let ambient = effective_color * material.ambient;
@@ -50,8 +61,19 @@ mod tests {
         let position = point(0.0, 0.0, 0.0);
         let light = PointLight::new(point(0.0, 0.0, -10.0), Color::WHITE);
         let material = Material::default();
-        let result = point_lighting(&material, &light, position, eyev, normalv);
+        let result = point_lighting(&material, &light, position, eyev, normalv, false);
         assert_almost_eq_color(result, Color::new(1.9, 1.9, 1.9));
+    }
+
+    #[test]
+    fn lighting_in_shadow() {
+        let eyev = vector(0.0, 0.0, 1.0);
+        let normalv = vector(0.0, 0.0, -1.0);
+        let position = point(0.0, 0.0, 0.0);
+        let light = PointLight::new(point(0.0, 0.0, -10.0), Color::WHITE);
+        let material = Material::default();
+        let result = point_lighting(&material, &light, position, eyev, normalv, true);
+        assert_almost_eq_color(result, Color::new(0.1, 0.1, 0.1));
     }
 
     #[test]
@@ -61,7 +83,7 @@ mod tests {
         let position = point(0.0, 0.0, 0.0);
         let light = PointLight::new(point(0.0, 0.0, -10.0), Color::WHITE);
         let material = Material::default();
-        let result = point_lighting(&material, &light, position, eyev, normalv);
+        let result = point_lighting(&material, &light, position, eyev, normalv, false);
         assert_almost_eq_color(result, Color::new(1.0, 1.0, 1.0));
     }
 }

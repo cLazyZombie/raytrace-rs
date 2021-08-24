@@ -42,11 +42,40 @@ impl World {
             if let Some(front_most) = front_most {
                 let mut acc_color = Color::BLACK;
                 for light in &self.point_lights {
-                    acc_color += point_lighting(front_most.material, light, front_most.pos, eyev, front_most.normalv);
+                    let is_shadowed = self.is_shadowed(front_most.pos, light);
+                    acc_color += point_lighting(
+                        front_most.material,
+                        light,
+                        front_most.pos,
+                        eyev,
+                        front_most.normalv,
+                        is_shadowed,
+                    );
                 }
                 acc_color
             } else {
                 Color::BLACK
+            }
+        }
+    }
+
+    pub fn is_shadowed(&self, pos: Vec4, light: &PointLight) -> bool {
+        let obj_to_light = light.pos - pos;
+        let obj_to_light_v = obj_to_light.normalize();
+        let ray = Ray::new(pos, obj_to_light_v);
+        let intersections = self.intersect(&ray);
+
+        if intersections.len() == 0 {
+            false
+        } else {
+            if let Some(_) = intersections
+                .iter()
+                .filter(|i| i.t > 0.01 && i.t <= obj_to_light.mag() && i.normalv.dot(obj_to_light_v) > 0.0)
+                .next()
+            {
+                true
+            } else {
+                false
             }
         }
     }
@@ -113,5 +142,14 @@ mod tests {
         let ray = Ray::new(point(0.0, 0.0, -5.0), vector(0.0, 0.0, 1.0));
         let color = world.shade(&ray, vector(0.0, 0.0, 1.0));
         assert_almost_eq_color(color, Color::new(0.46066123, 0.11516531, 0.34549594));
+    }
+
+    #[test]
+    fn is_shadowed() {
+        let world = World::default();
+        let light = &world.point_lights[0]; // -10, 10, -10,
+        assert_eq!(world.is_shadowed(point(10.0, -10.0, 10.0), light), true);
+        assert_eq!(world.is_shadowed(point(-20.0, 20.0, -20.0), light), false);
+        assert_eq!(world.is_shadowed(point(-2.0, 2.0, -2.0), light), false);
     }
 }
