@@ -19,11 +19,13 @@ pub fn point_lighting(
     normalv: Vec4,
     is_shadowed: bool,
 ) -> Color {
+    let color = material.color(position);
+
     if is_shadowed {
-        return material.ambient * material.color;
+        return material.ambient * color;
     }
 
-    let effective_color = material.color * light.intensity;
+    let effective_color = color * light.intensity;
     let lightv = (light.pos - position).normalize();
     let ambient = effective_color * material.ambient;
     let light_dot_normal = lightv.dot(normalv);

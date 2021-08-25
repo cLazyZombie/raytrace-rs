@@ -1,4 +1,6 @@
-use crate::{point, point_lighting, Color, Intersection, Material, Object, PointLight, Ray, Sphere, Vec4};
+use crate::{
+    point, point_lighting, Color, Intersection, Material, MaterialPattern, Object, PointLight, Ray, Sphere, Vec4,
+};
 
 pub struct World {
     pub objects: Vec<Box<dyn Object>>,
@@ -84,10 +86,10 @@ impl World {
 impl Default for World {
     fn default() -> Self {
         let mut obj1 = Sphere::new(point(0.0, 0.0, 0.0), 1.0);
-        obj1.mat = Material::new(Color::new(0.8, 0.2, 0.6), 0.2, 0.7, 0.2, 200.0);
+        obj1.mat = Material::new(Color::new(0.8, 0.2, 0.6), MaterialPattern::Solid, 0.2, 0.7, 0.2, 200.0);
 
         let mut obj2 = Sphere::new(point(0.0, 0.0, 0.0), 0.5);
-        obj2.mat = Material::new(Color::new(0.2, 0.6, 0.8), 0.2, 0.7, 0.2, 200.0);
+        obj2.mat = Material::new(Color::new(0.2, 0.6, 0.8), MaterialPattern::Solid, 0.2, 0.7, 0.2, 200.0);
 
         let light = PointLight::new(point(-10.0, 10.0, -10.0), Color::WHITE);
 
