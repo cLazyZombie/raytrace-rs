@@ -8,7 +8,7 @@ pub struct Canvas {
 }
 
 impl Canvas {
-    /// gamme: gamma correction value. pow(color, 1/gamma). 2.2 if None
+    /// gamma: gamma correction value. pow(color, 1/gamma). 2.2 if None
     pub fn new(width: u32, height: u32, gamma: Option<f32>) -> Self {
         let buff = vec![Color::new(0.0, 0.0, 0.0); (width * height) as usize];
         let gamma = if let Some(gamma) = gamma { gamma } else { 2.2 };
@@ -41,9 +41,9 @@ impl Canvas {
             let (x, y) = Self::get_xy(self.width, idx as u32);
 
             let color = image::Rgb([
-                (f32::powf(color.red.clamp(0.0, 1.0), self.gamma) * 255.0) as u8,
-                (f32::powf(color.green.clamp(0.0, 1.0), self.gamma) * 255.0) as u8,
-                (f32::powf(color.blue.clamp(0.0, 1.0), self.gamma) * 255.0) as u8,
+                (f32::powf(color.red.clamp(0.0, 1.0), 1. / self.gamma) * 255.0 + 0.5) as u8,
+                (f32::powf(color.green.clamp(0.0, 1.0), 1. / self.gamma) * 255.0 + 0.5) as u8,
+                (f32::powf(color.blue.clamp(0.0, 1.0), 1. / self.gamma) * 255.0 + 0.5) as u8,
             ]);
 
             *image.get_pixel_mut(x, y) = color;

@@ -42,7 +42,8 @@ impl World {
         } else {
             let front_most = intersections.iter().filter(|i| i.t > 0.0).next();
             if let Some(front_most) = front_most {
-                let mut acc_color = Color::BLACK;
+                //let mut acc_color = Color::BLACK;
+                let mut acc_color = front_most.material.color(front_most.pos) * front_most.material.ambient;
                 for light in &self.point_lights {
                     let is_shadowed = self.is_shadowed(front_most.pos, light);
                     acc_color += point_lighting(

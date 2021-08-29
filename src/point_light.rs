@@ -19,15 +19,13 @@ pub fn point_lighting(
     normalv: Vec4,
     is_shadowed: bool,
 ) -> Color {
-    let color = material.color(position);
-
     if is_shadowed {
-        return material.ambient * color;
+        return Color::BLACK;
     }
 
+    let color = material.color(position);
     let effective_color = color * light.intensity;
     let lightv = (light.pos - position).normalize();
-    let ambient = effective_color * material.ambient;
     let light_dot_normal = lightv.dot(normalv);
 
     let diffuse;
@@ -48,7 +46,7 @@ pub fn point_lighting(
         }
     }
 
-    ambient + diffuse + specular
+    diffuse + specular
 }
 
 #[cfg(test)]

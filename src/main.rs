@@ -20,10 +20,10 @@ fn main() {
 
     let mut world = World::new();
 
-    let light1 = PointLight::new(point(-5.0, 5.0, 5.0), Color::WHITE);
+    let light1 = PointLight::new(point(-5.0, 5.0, 5.0), Color::WHITE * 0.9);
     world.add_pointlight(light1);
 
-    let light2 = PointLight::new(point(5.0, 0.0, 5.0), Color::WHITE);
+    let light2 = PointLight::new(point(5.0, 0.0, 5.0), Color::WHITE * 0.7);
     world.add_pointlight(light2);
 
     let mut sphere1 = Sphere::new(point(-0.5, 1.0, 10.0), 1.0);
@@ -35,14 +35,14 @@ fn main() {
     world.add_object(sphere2);
 
     let mut aabb1 = Aabb::new(point(-4.0, 0.0, -25.0), point(4.0, 100.0, 13.0), false);
-    aabb1.mat = Material::new(Color::new(0.3, 0.3, 0.3), MaterialPattern::Check, 0.5, 0.4, 0.3, 100.0);
+    aabb1.mat = Material::new(Color::new(0.3, 0.3, 0.3), MaterialPattern::Check, 0.2, 0.4, 0.3, 100.0);
     world.add_object(aabb1);
 
     let mut aabb2 = Aabb::new(point(1.0, 0.0, 9.0), point(2.0, 1.0, 10.0), true);
     aabb2.mat = Material::new(Color::new(0.2, 0.6, 0.9), MaterialPattern::Solid, 0.2, 0.3, 1.0, 200.0);
     world.add_object(aabb2);
 
-    let mut canvas = Canvas::new(width, height, None);
+    let mut canvas = Canvas::new(width, height, Some(1.0));
 
     for ix in 0..width {
         for iy in 0..height {
